@@ -25,13 +25,15 @@ const shirtColorSelect = document.getElementById('color');
 shirtDesign.addEventListener("change", (e) => {
     if (e.target.value === "js puns") {
         shirtColor.style.display = 'block';
+        shirtColorSelect.children[4].removeAttribute('selected')
         shirtColorSelect.children[1].setAttribute('selected', '');
         for (let i = 1; i <= 3; i++) {
             shirtColorSelect.children[i].style.display = 'block';
             shirtColorSelect.children[i+3].style.display = 'none';
         };
-    } else {
+    } else if (e.target.value === "heart js") {
         shirtColor.style.display = 'block';
+        shirtColorSelect.children[1].removeAttribute('selected')
         shirtColorSelect.children[4].setAttribute('selected', '');
         for (let i = 1; i <= 3; i++) {
             shirtColorSelect.children[i].style.display = 'none';
@@ -49,12 +51,9 @@ document.querySelector('.activities').addEventListener('change', e => {
     let clicked = e.target;
     let clickedTime = clicked.getAttribute('data-day-and-time');
 
-    //loop to add activities' price to total
-    for (let i = 0; i <= 6; i++) {
-        if (checkboxes[i].checked === true) {
-            activitiesCostValue += parseInt(checkboxes[i].getAttribute('data-cost'));
-        }
-    }
+    //Change price total
+    (clicked.checked) ? activitiesCostValue += parseInt(e.target.getAttribute('data-cost')) : activitiesCostValue -= parseInt(e.target.getAttribute('data-cost'));
+    
     activitiesCostElement.textContent = `Total: $${activitiesCostValue}`;
     //loop to prevent clashing activities by enabling/disabling activities
     for (let i = 0; i <= 6; i++) {
@@ -70,15 +69,14 @@ document.querySelector('.activities').addEventListener('change', e => {
       }
 });
 
-//disable payment boxes by default
-document.getElementById('credit-card').style.display = 'none';
+//disable non-card payment boxes by default
+let paymentSelect = document.getElementById('payment');
+
+paymentSelect.removeChild(paymentSelect.childNodes[1]);
 document.getElementById('paypal').style.display = 'none';
 document.getElementById('bitcoin').style.display = 'none';
 
-//enable payment boxes related to payment type selected
-let paymentSelect = document.getElementById('payment');
-let cardSelected = false;
-
+//Changing payment types
 paymentSelect.addEventListener('change', e => {
     let selectedPaymentType = e.target.value;
     document.getElementById(e.target.value).style.display = 'block';
@@ -86,7 +84,7 @@ paymentSelect.addEventListener('change', e => {
         cardSelected = true;
     }
     
-    for (let i = 1; i <= 3; i++) {
+    for (let i = 0; i <= 2; i++) {
         if (e.target.value !== paymentSelect.children[i].value) {
             document.getElementById(paymentSelect.children[i].value).style.display = 'none';
         }
@@ -116,13 +114,13 @@ const cvvInput = document.getElementById('cvv');
 
 //validator functions
 function validationPass (element) {
-    element.parentElement.className = 'valid';
+    element.parentElement.classList.add('valid');
     element.parentElement.classList.remove('not-valid');
     element.parentElement.lastElementChild.style.display = 'none';
   }
 
 function validationFail (element) {
-    element.parentElement.className = 'not-valid';
+    element.parentElement.classList.add('not-valid');
     element.parentElement.classList.remove('valid');
     element.parentElement.lastElementChild.style.display = 'block';
 }
@@ -147,7 +145,7 @@ const emailBlankValidator = () => {
 
 const activityValidator = () => {
     const activitySectionIsValid = activitiesCostValue > 0;
-    activitySectionIsValid ? validationPass(activitiesCostElement) : validationFail(activitiesCostElement);
+    activitySectionIsValid ? validationPass(document.getElementById('activities-box')) : validationFail(document.getElementById('activities-box'));
     return activitySectionIsValid;
 }
 
@@ -188,15 +186,13 @@ document.querySelector('form').addEventListener('submit', e => {
     if (!activityValidator()) {
         e.preventDefault();
     };
-    if (cardSelected === true) {
-        if (!cardNumValidator()) {
-            e.preventDefault();
-        };
-        if (!zipValidator()) {
-            e.preventDefault();
-        };
-        if (!cvvValidator()) {
-            e.preventDefault();
-        };
-    }
+    if (!cardNumValidator()) {
+        e.preventDefault();
+    };
+    if (!zipValidator()) {
+        e.preventDefault();
+    };
+    if (!cvvValidator()) {
+        e.preventDefault();
+    };
 });
